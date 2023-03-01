@@ -1,0 +1,26 @@
+#lang eopl
+#lang racket/base
+(require rackunit)
+
+;; union tests
+(check-equal? (union '(1 2 3) '(4 5 6)) '(1 2 3 4 5 6))
+(check-equal? (union '(c b f d) '(b c a)) '(a b c d f))
+(check-equal? (union '("abc") '()) '("abc"))
+(check-equal? (union '((z) (x y)) '((y x) (z))) '((z) (x y) (y x)))
+
+;; intersection tests
+(check-equal? (intersection '(1 2 3 4) '(2 4 5)) '(2 4))
+(check-equal? (intersection '(s a n d e p) '(b h a t)) '(a))
+(check-equal? (intersection '("abc") '("ab")) '())
+(check-equal? (intersection '((x y) (z)) '((x y) (y x))) '((x y)))
+
+;; disjoint tests
+(check-equal? (disjoint? '(1 2 3) '()) #t)
+(check-equal? (disjoint? '(a b c) '(b)) #f)
+(check-equal? (disjoint? '((x z)) '((x y) (z))) #t)
+
+;; subset tests
+(check-equal? (subset? '() '()) #t)
+(check-equal? (subset? '(1 2 3) '(4 1 3 5 2)) #t)
+(check-equal? (subset? '(b a c) '(d f e a g)) #f)
+(check-equal? (subset? '(1 3 2) '(3 2 1)) #t)
