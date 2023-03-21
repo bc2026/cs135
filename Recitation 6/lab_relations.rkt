@@ -2,7 +2,7 @@
 
 #|-------------------------------------------------------------------------------
  | Name: Bhagawat Chapagain
- | Pledge: I pledge my honor 
+ | Pledge: I pledge my honor that I have abided by the Stevens Honors System.
  |-------------------------------------------------------------------------------|#
 
 
@@ -59,11 +59,18 @@
 
 ;; Type Signature: (compose relation relation) -> relation
 ;; 5 PTS
+
+(define (composeHelper t L)
+  (cond ((null? L) '())
+        (else (append (list (append (list t) (list (car L)))) (composeHelper t (cdr L))))))
+
 (define (compose S R)
-   "implement"  
-)
-       
-   
+  (cond ((null? R) '())
+        ((null? S) '())
+        ((not (null? (relate (cadar R) S)))
+         (make-set (append (composeHelper (caar R) (relate (cadar R) S)) (compose S (cdr R)))))
+        (else
+         (compose S (cdr R)))))     
 
 
 
@@ -97,15 +104,19 @@
  |     -> ((1 3) (1 4) (2 3))
  |   (power 3 '((1 2) (2 3) (4 3) (2 4) (5 6)) )
  |     -> ((1 3))
- |   (power 4 '((1 2) (2 3) (4 3) (2 4) (5 6)) )
+ |   (power 3 '((1 2) (2 3) (4 3) (2 4) (5 6)) )
  |     -> ()
  |#
 
 ;; Type Signature: (power nonnegative-int relation) -> relation
 ;; 5 PTS
 (define (power k R)
-    "implement"  
-)
+  (cond
+    [(null? R) '()]
+    [(zero? k) '()]
+    [(= k 1) R]
+    [else (compose R (power (- k 1) R))])
+  )
         
 
 
@@ -136,12 +147,21 @@
 ;; Type Signature: (transitive-closure relation) -> relation
 ;; 5 PTS
 (define (transitive-closure R)
-   "implement"  
-)
+  (let loop ((count 0))
+    (if (set-equal? (transitiveC-helper count R) (transitiveC-helper (+ 1 count) R))
+
+
+        (transitiveC-helper count R)
+                       (loop (+ count 1))))
+  )
+
+(define (transitiveC-helper num L)
+   (if (equal? num 0) '()
+   (if (equal? num 1) L
+   (union (power num L) (transitiveC-helper (- num 1) L)))))
+
+
   
-
-
-
 
 #| Implement "transitive?" to which accepts a relation R
  |   and return whether R is transitive.
@@ -167,10 +187,8 @@
 ;; Type signature: (transitive? relation) -> boolean
 ;; 3 PTS
 (define (transitive? R)
-   "implement" 
+   (set-equal? R (transitive-closure R)) 
 )
-
-
 
 
 #| Implement "equivalence?" to accept a positive integer n and a relation R
@@ -200,7 +218,9 @@
 ;; Type signature: (equivalence? positive-int relation) -> boolean
 ;; 2 PTS
 (define (equivalence? n R)
-  "implement"
+  (if (reflexive? n R)
+      (if (symmetric? R)
+          (if (transitive? R) #t #f) #f) #f)
  )
 
 
@@ -244,9 +264,24 @@
 
 ;; Type signature: (involutive? positive-int relation) -> boolean
 ;; 3 Extra Credit PTS
+
 (define (involutive? n R)
-   "implement"  
-)
+  (and (surjective? n R)
+       (injective? R)
+       (symmetric? R)))
+
+(define (surjective? n R)
+  (if (equal? n 0) #t
+      (if (element? (surjectiveHelper? R) n)
+          (surjective? (- n 1) R)
+          #f)))
+
+(define (surjectiveHelper? R)
+  (if (null? R) '()
+      (cons (cadr (car R)) (surjectiveHelper? (cdr R)))) )
+
+
+
 
 
 
@@ -269,8 +304,16 @@
 ;; Type signature: (functino? relation) -> boolean
 ;; 3 Extra Credit PTS
 (define (function? R)
-  "implement"
-)
+  (define (find-duplicates lst)
+    (cond ((null? lst) #f)
+          ((member (car lst) (cdr lst)) #t)
+          (else (find-duplicates (cdr lst)))))
+
+  (cond ((null? R) #t)
+        ((find-duplicates (map car R)) #f)
+        (else (function? (cdr R)))))
+
+
 
 
 
